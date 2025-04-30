@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>Quote Card</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      direction: rtl;
+      text-align: center;
+      padding: 20px;
+      background: #222;
+      color: white;
+    }
+    .card {
+      margin: auto;
+      padding: 20px;
+      border-radius: 20px;
+      width: 300px;
+      background-color: #333;
+      position: relative;
+    }
+    .profile-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    input, textarea, select {
+      margin: 10px 0;
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+      width: 100%;
+    }
+    canvas {
+      display: none;
+    }
+    .preview {
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>سازنده نقل‌قول</h2>
+  <input type="text" id="author" placeholder="نام نویسنده">
+  <input type="text" id="date" placeholder="تاریخ (مثلاً 2025.4.30)">
+  <textarea id="quote" placeholder="متن نقل‌قول..."></textarea>
+  <input type="color" id="bgColor" value="#333">
+  <input type="file" id="profileImage" accept="image/*">
+  <button onclick="generateCard()">پیش‌نمایش و ذخیره</button>
+
+  <div class="preview">
+    <div class="card" id="card" style="background-color:#333;">
+      <img src="" id="previewImg" class="profile-img" style="display:none;">
+      <p id="quoteText"></p>
+      <small id="authorText"></small><br>
+      <small id="dateText"></small>
+    </div>
+  </div>
+
+  <canvas id="canvas" width="300" height="300"></canvas>
+
+  <script>
+    const card = document.getElementById('card');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    function generateCard() {
+      const author = document.getElementById('author').value;
+      const date = document.getElementById('date').value;
+      const quote = document.getElementById('quote').value;
+      const bgColor = document.getElementById('bgColor').value;
+      const imageInput = document.getElementById('profileImage');
+      const imagePreview = document.getElementById('previewImg');
+
+      document.getElementById('quoteText').innerText = quote;
+      document.getElementById('authorText').innerText = author;
+      document.getElementById('dateText').innerText = date;
+      card.style.backgroundColor = bgColor;
+
+      if (imageInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imagePreview.src = e.target.result;
+          imagePreview.style.display = 'block';
+          drawToCanvas(e.target.result, quote, author, date, bgColor);
+        };
+        reader.readAsDataURL(imageInput.files[0]);
+      } else {
+        imagePreview.style.display = 'none';
+        drawToCanvas(null, quote, author, date, bgColor);
+      }
+    }
+
+    function drawToCanvas(imgSrc, quote, author, date, bgColor) {
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (imgSrc) {
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 10, 10, 50, 50);
+          drawText();
+        };
+        img.src = imgSrc;
+      } else {
+        drawText();
+      }
+
+      function drawText() {
+        ctx.fillStyle = "white";
+        ctx.font = "16px sans-serif";
+        ctx.fillText(quote, 10, 80);
+        ctx.fillText("- " + author, 10, 110);
+        ctx.fillText(date, 10, 130);
+        const link = document.createElement('a');
+        link.download = "quote_card.png";
+        link.href = canvas.toDataURL();
+        link.innerText = "دانلود تصویر";
+        document.body.appendChild(link);
+      }
+    }
+  </script>
+</body>
+</html>
